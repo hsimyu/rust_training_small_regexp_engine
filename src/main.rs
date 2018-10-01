@@ -43,6 +43,8 @@ fn main()
 }
 
 fn match_one(pattern: &str, text: &str) -> bool {
+    println!("match_one(): pattern: {}, text: {}", pattern, text);
+
     if pattern.is_empty() { return true; } // 空パターンは任意テキストと一致
     if text.is_empty() { return false; } // テキストが空なら、パターンに依らず一致しない
 
@@ -55,13 +57,15 @@ fn match_one(pattern: &str, text: &str) -> bool {
 }
 
 fn match_multi(pattern: &str, text: &str) -> bool {
+    println!("match_multi(): pattern: {}, text: {}", pattern, text);
+
     if pattern.is_empty() { return true; } // 空パターンは任意テキストと一致
 
     if pattern == "$" && text.is_empty() { return true; } // $ 文字サポート
 
     let (pattern_head, pattern_tail) = pattern.split_at(1);
     // パターンが2文字以上残っている場合は ? 文字チェックのため、パターンの次も見る
-    if pattern_tail.len() > 1 {
+    if pattern_tail.len() > 0 {
         let (pattern_second_head, _) = pattern_tail.split_at(1);
 
         if pattern_second_head == "?" {
@@ -81,6 +85,8 @@ fn match_multi(pattern: &str, text: &str) -> bool {
 }
 
 fn match_question(pattern: &str, text: &str) -> bool {
+    println!("match_question(): pattern: {}, text: {}", pattern, text);
+
     // パターンを head (a?) と tail (?以降) に分割
     let (pattern_head, pattern_tail) = pattern.split_at(2);
 
@@ -104,6 +110,7 @@ fn match_question(pattern: &str, text: &str) -> bool {
 }
 
 fn search(pattern: &str, text: &str) -> bool {
+    println!("============================================");
     let (pattern_head, pattern_tail) = pattern.split_at(1);
 
     if pattern_head == "^" {
@@ -114,14 +121,14 @@ fn search(pattern: &str, text: &str) -> bool {
 
         // text か空の場合は特別なことしない
         if text.is_empty() {
-            println!("[0]: check match between {} and {}", pattern, text);
+            println!("check empty match between {} and {}", pattern, text);
             return match_multi(pattern, text);
         }
 
         return (0..text.len()).any(
             |index| -> bool {
                 let (_, text_tail) = text.split_at(index);
-                println!("[{}]: check match between {} and {}", index, pattern, text_tail);
+                println!("check match between {} and {}", pattern, text_tail);
 
                 return match_multi(pattern, text_tail);
             }
