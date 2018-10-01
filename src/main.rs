@@ -40,6 +40,12 @@ fn main()
     assert_eq!(search("a?b?c", "c"), true);
     assert_eq!(search("ab?c", "bc"), false);
     assert_eq!(search("a?b?c?", ""), true);
+
+    // *
+    assert_eq!(search("a*", ""), true);
+    assert_eq!(search("a*", "aaaaa"), true);
+    assert_eq!(search("a*b", "aaaaaab"), true);
+    assert_eq!(search("a*b", "aacaaaac"), false);
 }
 
 fn match_one(pattern: &str, text: &str) -> bool {
@@ -70,6 +76,8 @@ fn match_multi(pattern: &str, text: &str) -> bool {
 
         if pattern_second_head == "?" {
             return match_question(pattern, text);
+        } else if pattern_second_head == "*" {
+            return match_star(pattern, text);
         }
     }
 
@@ -100,6 +108,30 @@ fn match_question(pattern: &str, text: &str) -> bool {
         return 
             // ?より前の文字が一致しており、?以降も一致している
             (match_one(pattern_head, text_head) && match_multi(pattern_tail, text_tail)) ||
+            // ?以降の文字が一致している
+            match_multi(pattern_tail, text);
+    } else {
+        // text が空文字の時はパターンの後ろだけチェックすればいい
+        return match_multi(pattern_tail, text);
+    }
+}
+
+fn match_star(pattern: &str, text: &str) -> bool {
+    println!("match_star(): pattern: {}, text: {}", pattern, text);
+
+    // パターンを head (a*) と tail (*以降) に分割
+    let (pattern_head, pattern_tail) = pattern.split_at(2);
+
+    // head は更に "文字" と "*" に分割
+    let (pattern_head, _) = pattern_head.split_at(1);
+
+    if !text.is_empty() {
+        // text の頭を抽出
+        let (text_head, text_tail) = text.split_at(1);
+
+        return 
+            // *より前の文字が一致しており、text_tail も同じパターンと一致している
+            (match_one(pattern_head, text_head) && match_multi(pattern, text_tail)) ||
             // ?以降の文字が一致している
             match_multi(pattern_tail, text);
     } else {
