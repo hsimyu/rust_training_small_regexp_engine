@@ -49,8 +49,6 @@ fn main()
 }
 
 fn match_one(pattern: &str, text: &str) -> bool {
-    println!("match_one(): pattern: {}, text: {}", pattern, text);
-
     if pattern.is_empty() { return true; } // 空パターンは任意テキストと一致
     if text.is_empty() { return false; } // テキストが空なら、パターンに依らず一致しない
 
@@ -63,8 +61,6 @@ fn match_one(pattern: &str, text: &str) -> bool {
 }
 
 fn match_multi(pattern: &str, text: &str) -> bool {
-    println!("match_multi(): pattern: {}, text: {}", pattern, text);
-
     if pattern.is_empty() { return true; } // 空パターンは任意テキストと一致
 
     if pattern == "$" && text.is_empty() { return true; } // $ 文字サポート
@@ -93,8 +89,6 @@ fn match_multi(pattern: &str, text: &str) -> bool {
 }
 
 fn match_question(pattern: &str, text: &str) -> bool {
-    println!("match_question(): pattern: {}, text: {}", pattern, text);
-
     // パターンを head (a?) と tail (?以降) に分割
     let (pattern_head, pattern_tail) = pattern.split_at(2);
 
@@ -117,8 +111,6 @@ fn match_question(pattern: &str, text: &str) -> bool {
 }
 
 fn match_star(pattern: &str, text: &str) -> bool {
-    println!("match_star(): pattern: {}, text: {}", pattern, text);
-
     // パターンを head (a*) と tail (*以降) に分割
     let (pattern_head, pattern_tail) = pattern.split_at(2);
 
@@ -142,7 +134,6 @@ fn match_star(pattern: &str, text: &str) -> bool {
 }
 
 fn search(pattern: &str, text: &str) -> bool {
-    println!("============================================");
     let (pattern_head, pattern_tail) = pattern.split_at(1);
 
     if pattern_head == "^" {
@@ -150,20 +141,8 @@ fn search(pattern: &str, text: &str) -> bool {
     } else {
         // ^ 文字で始まっていないパターンの場合は、
         // text の全地点を開始位置として検証
-
-        // text か空の場合は特別なことしない
-        if text.is_empty() {
-            println!("check empty match between {} and {}", pattern, text);
-            return match_multi(pattern, text);
-        }
-
-        return (0..text.len()).any(
-            |index| -> bool {
-                let (_, text_tail) = text.split_at(index);
-                println!("check match between {} and {}", pattern, text_tail);
-
-                return match_multi(pattern, text_tail);
-            }
-        );
+        // => 頭に ".*" をつけるだけで良い
+        let pattern = ".*".to_string() + pattern;
+        return match_multi(pattern.as_str(), text);
     }
 }
